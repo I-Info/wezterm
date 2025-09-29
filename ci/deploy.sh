@@ -84,6 +84,11 @@ case $OSTYPE in
       security default-keychain -d user -s $def_keychain
       echo "Remove build.keychain"
       security delete-keychain build.keychain || true
+    else
+      echo "Codesign"
+      # Using default keychain; useful for local testing
+      /usr/bin/codesign --force --options runtime \
+        --entitlements ci/macos-entitlement.plist --deep --sign - $zipdir/WezTerm.app/
     fi
 
     set -x
