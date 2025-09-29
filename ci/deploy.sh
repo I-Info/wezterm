@@ -42,6 +42,8 @@ case $OSTYPE in
       # a single-arch package to be built
       if [[ -f target/release/$bin ]] ; then
         cp target/release/$bin $zipdir/WezTerm.app/Contents/MacOS/$bin
+      elif [[ -n "$MACOS_ARM" ]] ; then
+        cp target/aarch64-apple-darwin/release/$bin $zipdir/WezTerm.app/Contents/MacOS/$bin
       else
         # The CI runs `cargo build --target XXX --release` which means that
         # the binaries will be deployed in `target/XXX/release` instead of
@@ -84,6 +86,11 @@ case $OSTYPE in
       security default-keychain -d user -s $def_keychain
       echo "Remove build.keychain"
       security delete-keychain build.keychain || true
+    else
+      echo "Codesign"
+      # Using default keychain; useful for local testing
+      /usr/bin/codesign --force --options runtime \
+        --entitlements ci/macos-entitlement.plist --deep --sign - $zipdir/WezTerm.app/
     fi
 
     set -x
