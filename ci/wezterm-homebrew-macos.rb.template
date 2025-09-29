@@ -1,18 +1,18 @@
 # Note: if you are viewing this from the tap repo, this file is automatically
 # updated from:
-# https://github.com/wezterm/wezterm/blob/main/ci/wezterm-homebrew-macos.rb.template
+# https://github.com/I-Info/wezterm/blob/main/ci/wezterm-homebrew-macos.rb.template
 # by automation in the wezterm repo.
 # vim:ft=ruby:
 cask "wezterm" do
   version "@TAG@"
   sha256 "@SHA256@"
 
-  url "https://github.com/wezterm/wezterm/releases/download/#{version}/WezTerm-macos-#{version}.zip"
+  url "https://github.com/I-Info/wezterm/releases/download/#{version}/WezTerm-macos-#{version}.zip"
   name "WezTerm"
   desc "A GPU-accelerated cross-platform terminal emulator and multiplexer written by @wez and implemented in Rust"
   homepage "https://wezterm.org/"
 
-  conflicts_with cask: "wezterm/wezterm/wezterm-nightly"
+  conflicts_with cask: "wezterm wezterm@nightly"
 
   # Unclear what the minimal OS version is
   # depends_on macos: ">= :sierra"
@@ -27,6 +27,10 @@ cask "wezterm" do
     binary "#{appdir}/WezTerm.app/Contents/MacOS/#{tool}"
   end
 
+  bash_completion "#{appdir}/WezTerm.app/Contents/Resources/shell-completion/bash", target: "wezterm"
+  fish_completion "#{appdir}/WezTerm.app/Contents/Resources/shell-completion/fish", target: "wezterm.fish"
+  zsh_completion "#{appdir}/WezTerm.app/Contents/Resources/shell-completion/zsh", target: "_wezterm"
+
   preflight do
     # Move "WezTerm-macos-#{version}/WezTerm.app" out of the subfolder
     staged_subfolder = staged_path.glob(["WezTerm-*", "wezterm-*"]).first
@@ -37,16 +41,7 @@ cask "wezterm" do
   end
 
   zap trash: [
+    "~/.local/share/wezterm",
     "~/Library/Saved Application State/com.github.wez.wezterm.savedState",
   ]
-
-  def caveats; <<~EOS
-    Cask #{token} related executables like 'wezterm', 'wezterm-gui',
-    'wezterm-mux-server', are linked into
-      /usr/local/bin/    for x86 Mac,
-      /opt/homebrew/bin/ for M1 Mac.
-
-    Removal of them is ensured by 'brew uninstall --cask #{token}'.
-  EOS
-  end
 end
