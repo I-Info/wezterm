@@ -315,10 +315,17 @@ impl<'a> QuadAllocator for MappedQuads<'a> {
         // the render pass.
         let idx = idx * VERTICES_PER_CELL;
         let len = self.capacity * VERTICES_PER_CELL;
-        if idx + vertices.len() < len {
+        if idx + vertices.len() <= len {
             self.mapping
                 .slice_mut(idx..idx + vertices.len())
                 .copy_from_slice(vertices);
+        } else {
+            log::debug!(
+                "Ran out of space in quad allocator: idx={} len={} require={}",
+                idx,
+                len,
+                vertices.len()
+            );
         }
     }
 }
