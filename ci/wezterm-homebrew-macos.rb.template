@@ -21,7 +21,6 @@ cask "wezterm" do
   [
     "wezterm",
     "wezterm-gui",
-    "wezterm-mux-server",
     "strip-ansi-escapes"
   ].each do |tool|
     binary "#{appdir}/WezTerm.app/Contents/MacOS/#{tool}"
