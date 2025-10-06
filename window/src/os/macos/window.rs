@@ -586,8 +586,7 @@ impl Window {
             window.setTitle_(*nsstring(&name));
             window.setAcceptsMouseMovedEvents_(YES);
 
-            let view = WindowView::alloc(&inner)?;
-            view.initWithFrame_(rect);
+            let view = WindowView::init_with_frame(&inner, rect)?;
             view.setAutoresizingMask_(NSViewHeightSizable | NSViewWidthSizable);
 
             let () = msg_send![
@@ -3039,6 +3038,7 @@ impl WindowView {
             let () = msg_send![layer, setDelegate: view];
             let () = msg_send![layer, setContentsScale: 1.0];
             let () = msg_send![layer, setOpaque: NO];
+            let () = msg_send![layer, release];
             layer
         }
     }
@@ -3152,11 +3152,11 @@ impl WindowView {
         }
     }
 
-    fn alloc(inner: &Rc<RefCell<Inner>>) -> anyhow::Result<StrongPtr> {
+    fn init_with_frame(inner: &Rc<RefCell<Inner>>, rect: NSRect) -> anyhow::Result<StrongPtr> {
         let cls = Self::get_class();
 
-        let view_id: StrongPtr = unsafe { StrongPtr::new(msg_send![cls, new]) };
-
+        let view_id: id = unsafe { msg_send![cls, alloc] };
+        let view_id: StrongPtr = unsafe { StrongPtr::new(msg_send![view_id, initWithFrame:rect]) };
         inner.borrow_mut().view_id.replace(view_id.weak());
 
         let view = Box::into_raw(Box::new(Self {
