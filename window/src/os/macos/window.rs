@@ -3034,7 +3034,9 @@ impl WindowView {
         log::trace!("make_backing_layer");
         let class = class!(CAMetalLayer);
         unsafe {
-            let layer: id = msg_send![class, new];
+            // Use type method to get a instance of CAMetalLayer.
+            // So that we don't have to worry about retaining/releasing it.
+            let layer: id = msg_send![class, layer];
             let () = msg_send![layer, setDelegate: view];
             let () = msg_send![layer, setContentsScale: 1.0];
             let () = msg_send![layer, setOpaque: NO];
