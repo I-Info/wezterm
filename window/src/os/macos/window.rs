@@ -1230,13 +1230,19 @@ impl WindowInner {
     }
 
     fn invalidate(&mut self) {
+        log::info!("Invalidate");
         unsafe {
-            let () = msg_send![*self.view, setNeedsDisplay: YES];
             if let Some(window_view) = WindowView::get_this(&**self.view) {
-                window_view.inner.borrow_mut().invalidated = true;
+                let mut inner = window_view.inner.borrow_mut();
+                if inner.invalidated {
+                    return;
+                }
+                inner.invalidated = true;
             }
+            let () = msg_send![*self.view, setNeedsDisplay: YES];
         }
     }
+
     fn set_title(&mut self, title: &str) {
         let title = nsstring(title);
         unsafe {
