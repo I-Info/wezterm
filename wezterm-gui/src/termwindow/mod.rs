@@ -991,11 +991,22 @@ impl TermWindow {
                 } else {
                     log::trace!("DeadKeyStatus now: {:?}", status);
                 }
+
+                // Only trigger a repaint if the dead-key status actually changed.
+                // This avoids redundant invalidates when the IME system repeatedly
+                // emits the same composing state.
+                let should_invalidate = match (&self.dead_key_status, &status) {
+                    (DeadKeyStatus::None, DeadKeyStatus::None) => false,
+                    (DeadKeyStatus::Composing(a), DeadKeyStatus::Composing(b)) => a != b,
+                    _ => true,
+                };
+
                 self.dead_key_status = status;
                 self.update_title();
-                // Ensure that we repaint so that any composing
-                // text is updated
-                window.invalidate();
+
+                if should_invalidate {
+                    window.invalidate();
+                }
                 Ok(true)
             }
             WindowEvent::NeedRepaint => {

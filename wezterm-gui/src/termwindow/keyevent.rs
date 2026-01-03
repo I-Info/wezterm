@@ -715,9 +715,6 @@ impl super::TermWindow {
                     {
                         context.set_cursor(None);
                     }
-                    if !key.is_modifier() {
-                        context.invalidate();
-                    }
                 }
             }
             Key::Composed(s) => {
@@ -737,7 +734,6 @@ impl super::TermWindow {
                 }
                 pane.writer().write_all(s.as_bytes()).ok();
                 self.maybe_scroll_to_bottom_for_input(&pane);
-                context.invalidate();
             }
             Key::None => {}
         }
